@@ -1,0 +1,33 @@
+services:
+
+  db:
+    image: mariadb:11.8
+    environment:
+      MARIADB_ROOT_PASSWORD: rootpass
+      MARIADB_DATABASE: reservas
+      MARIADB_USER: reservas
+      MARIADB_PASSWORD: reservas
+    volumes:
+      - datos_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  app:
+    build: .
+    ports:
+      - "8080:8500"
+    environment:
+      RESERVAS_DB_HOST: db
+      RESERVAS_DB_USUARIO: reservas
+      RESERVAS_DB_CLAVE: reservas
+      RESERVAS_DB_NOMBRE: reservas
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  datos_db:
